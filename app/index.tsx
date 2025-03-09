@@ -50,22 +50,22 @@ const App = () => {
 
   return (
     
-    <SafeAreaProvider>
+    <SafeAreaProvider style={{backgroundColor: "#151718"}}>
       {isLoading ? (
         <ActivityIndicator style={{backgroundColor: "white"}}/>
       ) : (
         <SafeAreaView style={{flex: 1}}>
           <FlatList
-            style={{marginTop: 100}}
+            style={{marginTop: 175}}
             data={data}
             keyExtractor={({identifier}) => identifier}
             renderItem={({item}) => (
                 <ThemedView style={styles.titleContainer}>
                   <ThemedText type="title">
-                    {item.value.toFixed(2)}
+                    {item.value.toFixed(1)}
                   </ThemedText>
-                  <ThemedText >
-                    {item.name}
+                  <ThemedText type="subtitle">
+                    {item.name} (°C)
                   </ThemedText>
                 </ThemedView>
             )}
@@ -100,8 +100,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+    flexDirection: 'column',
+    gap: 2,
+    height: 250
   },
 });
 
