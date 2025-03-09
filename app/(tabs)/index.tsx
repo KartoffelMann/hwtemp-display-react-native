@@ -1,74 +1,108 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import React, {useEffect, useState} from 'react';
+import {ActivityIndicator, FlatList, Text, TextInput, View, StyleSheet,} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+type TempObj = {
+  identifier: string;
+  name: string;
+  value: number;
 }
 
+const App = () => {
+  const [isLoading, setLoading] = useState(true);
+  const [data, setData] = useState<TempObj[]>([]);
+  const [serverIP, setServerIP] = useState("");
+
+  const handleIPAddressChange = (newIP: string) => {
+    setServerIP(newIP);
+  };
+
+  const getTemps = async () => {
+    try {
+      fetch(`http://${serverIP}:8000/data`)
+        .then((response) => response.json())
+        .then((json) => {
+          const filteredData = json.filter((e: { name: string | string[]; }) => e.name.includes("GPU Hot Spot") || e.name.includes("Core (Tctl/Tdie)"))
+          setData(filteredData);
+        })
+      // console.log(json);
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const MINUTE_MS = 5000;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getTemps();
+    }, MINUTE_MS);
+
+    return () => clearInterval(interval);
+  }, [serverIP, data]);
+
+  return (
+    
+    <SafeAreaProvider>
+      {isLoading ? (
+        <ActivityIndicator style={{backgroundColor: "white"}}/>
+      ) : (
+        <SafeAreaView style={{flex: 1}}>
+          <FlatList
+            style={{marginTop: 100}}
+            data={data}
+            keyExtractor={({identifier}) => identifier}
+            renderItem={({item}) => (
+                <ThemedView style={styles.titleContainer}>
+                  <ThemedText type="title">
+                    {item.value.toFixed(2)}
+                  </ThemedText>
+                  <ThemedText >
+                    {item.name}
+                  </ThemedText>
+                </ThemedView>
+            )}
+          />
+            <SafeAreaView>
+            <TextInput
+              style={styles.input}
+              onChangeText={handleIPAddressChange}
+              value={serverIP}
+              placeholder={"Enter IP Address..."}
+              keyboardType='numeric'
+            />
+          </SafeAreaView>
+        </SafeAreaView>
+      )}
+    </SafeAreaProvider>
+  );
+};
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10,
+    backgroundColor: "white"
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
     position: 'absolute',
   },
+  titleContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
 });
+
+export default App;
