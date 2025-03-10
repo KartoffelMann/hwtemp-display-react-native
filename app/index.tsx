@@ -5,6 +5,8 @@ import {ActivityIndicator, FlatList, Text, TextInput, View, StyleSheet,} from 'r
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { StatusBar } from 'expo-status-bar';
+import { getBackgroundColorAsync } from 'expo-system-ui';
 
 type TempObj = {
   identifier: string;
@@ -55,6 +57,9 @@ const App = () => {
         <ActivityIndicator style={{backgroundColor: "white"}}/>
       ) : (
         <SafeAreaView style={{flex: 1}}>
+          <StatusBar
+            hidden={true}
+          />
           <FlatList
             style={{marginTop: 175}}
             data={data}
@@ -77,6 +82,7 @@ const App = () => {
               value={serverIP}
               placeholder={"Enter IP Address..."}
               keyboardType='numeric'
+              placeholderTextColor="white"
             />
           </SafeAreaView>
         </SafeAreaView>
@@ -91,7 +97,9 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
-    backgroundColor: "white"
+    backgroundColor: 'background',
+    borderColor: "white",
+    color: "white",
   },
   headerImage: {
     color: '#808080',
@@ -102,7 +110,8 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'column',
     gap: 2,
-    height: 250
+    height: 250,
+    
   },
 });
 
