@@ -16,8 +16,6 @@ type TempObj = {
 
 const App = () => {
 
-  const pingState = useRef(AppState.currentState)
-
   const [shouldPing, setShouldPing] = useState(false);
   const [data, setData] = useState<TempObj[]>([]);
   const [serverIP, setServerIP] = useState("");
@@ -75,7 +73,7 @@ const App = () => {
       
       <SafeAreaView style={{flex: 1}}>
         <FlatList
-          style={{marginTop: 150}}
+          style={{marginTop: 140}}
           data={data}
           keyExtractor={({identifier}) => identifier}
           renderItem={({item}) => (

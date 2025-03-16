@@ -35,6 +35,5 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-app-example
 .idea/
 android
