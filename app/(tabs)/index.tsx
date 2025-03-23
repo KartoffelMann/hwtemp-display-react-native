@@ -7,6 +7,9 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { StatusBar } from 'expo-status-bar';
 import { getBackgroundColorAsync } from 'expo-system-ui';
+import { getData } from '@/hooks/useLocalStorage';
+
+import { BetterLog, printDebug } from '@/hooks/useDebuggingTools';
 
 type TempObj = {
   identifier: string;
@@ -16,20 +19,15 @@ type TempObj = {
 
 const App = () => {
 
-  const [shouldPing, setShouldPing] = useState(false);
+  const [isPinging, setIsPinging] = useState(false);
   const [data, setData] = useState<TempObj[]>([]);
-  const [serverIP, setServerIP] = useState("");
 
-  const handleIPAddressChange = (newIP: string) => {
-    setServerIP(newIP);
-  };
-
-  const startPinging = () => {
-    setShouldPing(true)
-  }
 
   const getTemps = async () => {
     try {
+      
+      let serverIP = await getData("serverIP")
+      BetterLog("index.tsx", "getTemps", "pinging " + serverIP, false)
       fetch(`http://${serverIP}:8000/data`)
         .then((response) => response.json())
         .then((json) => {
@@ -47,33 +45,19 @@ const App = () => {
   const MINUTE_MS = 5000;
   useEffect(() => {
     const interval = setInterval(() => {
-        if(shouldPing)
-        {
-          getTemps();
-        } 
+      getTemps();
     }, MINUTE_MS);
 
     return () => clearInterval(interval);
-  }, [serverIP, data, shouldPing]);
+  }, [data, isPinging]);
 
   return (
     
-    <SafeAreaProvider style={{backgroundColor: "#151718"}}>
-      <SafeAreaView>
-        <TextInput
-          style={styles.input}
-          onChangeText={handleIPAddressChange}
-          onSubmitEditing={startPinging}
-          value={serverIP}
-          placeholder={"Enter IP Address..."}
-          keyboardType='numeric'
-          placeholderTextColor="white"
-        />
-      </SafeAreaView>
-      
+    <SafeAreaProvider style={{backgroundColor: "#151718"}}>     
       <SafeAreaView style={{flex: 1}}>
-        <FlatList
-          style={{marginTop: 140}}
+        {(data && data.length > 0) ? (
+          <FlatList
+          style={{marginTop: 160}}
           data={data}
           keyExtractor={({identifier}) => identifier}
           renderItem={({item}) => (
@@ -87,22 +71,20 @@ const App = () => {
             </ThemedView>
           )}
         />
+        ) : (
+            <View style={{marginVertical: "auto"}}>
+              <ThemedText style={{fontSize: 20, textAlign: "center", marginHorizontal: 45, verticalAlign: "middle"}}>
+                {data === null ? "Loading..." : "Go to Settings and enter your PC's IP address. Turn on and configure the server"}
+              </ThemedText>
+            </View>
+        )}
+        
       </SafeAreaView> 
     </SafeAreaProvider>
   );
 };
 
 const styles = StyleSheet.create({
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    backgroundColor: 'background',
-    borderColor: "white",
-    color: "white",
-    textAlign: 'center'
-  },
   headerImage: {
     color: '#808080',
     bottom: -90,
@@ -112,8 +94,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'column',
     gap: 2,
-    height: 250,
-    
+    height: 290,
   },
 });
 
