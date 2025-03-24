@@ -25,13 +25,13 @@ const App = () => {
 
   const getTemps = async () => {
     try {
-      
       let serverIP = await getData("serverIP")
-      BetterLog("index.tsx", "getTemps", "pinging " + serverIP, false)
-      fetch(`http://${serverIP}:8000/data`)
+      let port = await getData("port")
+      BetterLog("index.tsx", "getTemps", "pinging " + serverIP + ":" + port, true)
+      fetch(`http://${serverIP}:${port}/data`)
         .then((response) => response.json())
         .then((json) => {
-          const filteredData = json.filter((e: { name: string | string[]; }) => e.name.includes("GPU Hot Spot") || e.name.includes("Core (Tctl/Tdie)"))
+          const filteredData = json.filter((e: { name: string | string[]; }) => e.identifier.includes("cpu") || e.identifier.includes("gpu"))
           setData(filteredData);
         })
 
@@ -57,17 +57,20 @@ const App = () => {
       <SafeAreaView style={{flex: 1}}>
         {(data && data.length > 0) ? (
           <FlatList
-          style={{marginTop: 160}}
+          style={{marginTop: 140}}
           data={data}
           keyExtractor={({identifier}) => identifier}
           renderItem={({item}) => (
             <ThemedView style={styles.titleContainer}>
-              <ThemedText type="title">
-                {item.value.toFixed(1)}
-              </ThemedText>
-              <ThemedText type="subtitle">
-                {item.name} (°C)
-              </ThemedText>
+              
+                <ThemedText type="title">
+                  {item.value.toFixed(1)}
+                </ThemedText>
+                
+                <ThemedText type="subtitle">
+                  {item.name}   °C / RPM
+                </ThemedText>
+
             </ThemedView>
           )}
         />
@@ -93,8 +96,9 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: 'column',
-    gap: 2,
-    height: 290,
+    gap: 5,
+    height: 350,
+    marginHorizontal: 2
   },
 });
 

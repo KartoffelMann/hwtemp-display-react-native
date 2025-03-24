@@ -11,6 +11,7 @@ const settingsData = [
     title: 'General',
     data: [
       { id: 'ipAddress', label: 'IP Address', type: 'ipAddressInput'},
+      { id: 'port', label: "Port", type: "portInput"},
       { id: 'darkMode', label: 'Dark Mode (not implemented)', type: 'toggle', value: true },
     ],
   },
@@ -25,19 +26,29 @@ const settingsData = [
 const SettingsScreen = ({}) => {
 
   const [serverIP, setServerIP] = useState("");
+  const [port, setPort] = useState("");
 
   const handleIPAddressChange = (newIP: string) => {
     setServerIP(newIP);
+  };
+
+  const handlePortChange = (newPort: string) => {
+    setPort(newPort);
   };
 
   const saveIPAddress = () => {
     storeData("serverIP", serverIP)
   }
 
+  const savePort = () => {
+    storeData("port", port)
+  }
+
   const clearLocalStorage = () => {
     BetterLog("settings.tsx", "clearLocalStorageButton", "Clearing local storage", true)
     AsyncStorage.clear()
     setServerIP("")
+    setPort("")
   }
   
   useEffect(() => { 
@@ -55,8 +66,23 @@ const SettingsScreen = ({}) => {
         console.error('Error loading server IP:', error);
       }
     }
+    async function loadPort() {
+      try {
+        const storedPort = await getData('port');
+        if (storedPort) {
+            try{
+                setPort(JSON.parse(storedPort).port)
+            } catch (e) {
+                setPort(storedPort)
+            }
+        }
+      } catch (error) {
+        console.error('Error loading port:', error);
+      }
+    }
     loadIpAddress();
-   }, [])
+    loadPort();
+   }, [serverIP, port])
 
   const renderItem = ({ item }) => {
     if (item.type === 'toggle') {
@@ -94,6 +120,23 @@ const SettingsScreen = ({}) => {
                     onChangeText={handleIPAddressChange}
                     onSubmitEditing={saveIPAddress}
                     value={serverIP}
+          />
+        </View>
+      )
+    }
+    else if (item.type === 'portInput')
+    {
+      return (
+        <View style={styles.itemContainer}>
+          <Text style={styles.itemLabel}>{item.label}</Text>
+          <TextInput
+                    style={styles.input}
+                    placeholder={"Enter here..."}
+                    keyboardType='numeric'
+                    placeholderTextColor="white"
+                    onChangeText={handlePortChange}
+                    onSubmitEditing={savePort}
+                    value={port}
           />
         </View>
       )

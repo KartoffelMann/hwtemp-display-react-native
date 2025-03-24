@@ -28,7 +28,10 @@ export function ThemedText({
         type === 'link' ? styles.link : undefined,
         style,
       ]}
+      adjustsFontSizeToFit={true}
+      numberOfLines={1}
       {...rest}
+      
     />
   );
 }
@@ -47,7 +50,8 @@ const styles = StyleSheet.create({
     fontSize: 140,
     fontWeight: 'bold',
     lineHeight: 140,
-    textAlign: "center"
+    textAlign: "center",
+   
   },
   subtitle: {
     fontSize: 20,
