@@ -27,7 +27,7 @@ const App = () => {
     try {
       let serverIP = await getData("serverIP")
       let port = await getData("port")
-      BetterLog("index.tsx", "getTemps", "pinging " + serverIP + ":" + port, true)
+      BetterLog("index.tsx", "getTemps", "pinging " + serverIP + ":" + port, false)
       fetch(`http://${serverIP}:${port}/data`)
         .then((response) => response.json())
         .then((json) => {
@@ -76,7 +76,7 @@ const App = () => {
         />
         ) : (
             <View style={{marginVertical: "auto"}}>
-              <ThemedText style={{fontSize: 20, textAlign: "center", marginHorizontal: 45, verticalAlign: "middle"}}>
+              <ThemedText style={{fontSize: 50, textAlign: "center", marginHorizontal: "auto", verticalAlign: "middle"}}>
                 {data === null ? "Loading..." : "Go to Settings and enter your PC's IP address. Turn on and configure the server"}
               </ThemedText>
             </View>
