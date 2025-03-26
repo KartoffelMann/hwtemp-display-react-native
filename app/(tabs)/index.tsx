@@ -10,8 +10,9 @@ import { getBackgroundColorAsync } from 'expo-system-ui';
 import { getData } from '@/hooks/useLocalStorage';
 
 import { BetterLog, printDebug } from '@/hooks/useDebuggingTools';
+import { TempText } from '@/components/TempText';
 
-type TempObj = {
+export type TempObj = {
   identifier: string;
   name: string;
   value: number;
@@ -31,7 +32,7 @@ const App = () => {
       fetch(`http://${serverIP}:${port}/data`)
         .then((response) => response.json())
         .then((json) => {
-          const filteredData = json.filter((e: { name: string | string[]; }) => e.identifier.includes("cpu") || e.identifier.includes("gpu"))
+          const filteredData = json.filter((e: { name: string | string[]; }) => (e.identifier.includes("cpu") || (e.identifier.includes("gpu") && !e.identifier.includes("fan"))))
           setData(filteredData);
         })
 
@@ -57,21 +58,11 @@ const App = () => {
       <SafeAreaView style={{flex: 1}}>
         {(data && data.length > 0) ? (
           <FlatList
-          style={{marginTop: 140}}
+          style={{paddingTop: 125, paddingBottom: 140}}
           data={data}
           keyExtractor={({identifier}) => identifier}
           renderItem={({item}) => (
-            <ThemedView style={styles.titleContainer}>
-              
-                <ThemedText type="title">
-                  {item.value.toFixed(1)}
-                </ThemedText>
-                
-                <ThemedText type="subtitle">
-                  {item.name}   °C / RPM
-                </ThemedText>
-
-            </ThemedView>
+            <TempText tempObj={item}/>
           )}
         />
         ) : (
